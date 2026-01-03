@@ -1,8 +1,9 @@
-.is-disabled {
+.is-disabled  {
   opacity: 0.5;
-  pointer-events: none;
+  pointer-events: none;    
 }
 
-.is-animating {
+/* Set the point for the entire slide */
+/* .is-animating {
   cursor: progress;
-}
+} */

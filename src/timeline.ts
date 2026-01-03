@@ -11,6 +11,7 @@ type AnimItem = {
   dur: number;
   delay: number;
   ease?: string;
+  at?: string;
 };
 
 function getDataNumber(el: Element, name: string, fallback: number): number {
@@ -23,6 +24,26 @@ function getDataNumber(el: Element, name: string, fallback: number): number {
 function getDataString(el: Element, name: string): string | undefined {
   const value = el.getAttribute(name);
   return value && value.trim() ? value.trim() : undefined;
+}
+
+function parsePositionOffset(value?: string): number | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  const numberPattern = /^[+-]?(?:\d+\.?\d*|\.\d+)$/;
+  const relativeMatch = trimmed.match(/^([+-])=([+-]?(?:\d+\.?\d*|\.\d+))$/);
+
+  if (relativeMatch) {
+    const amount = Number.parseFloat(relativeMatch[2]);
+    if (!Number.isFinite(amount)) return null;
+    return relativeMatch[1] === "+" ? amount : -amount;
+  }
+
+  if (numberPattern.test(trimmed)) {
+    const amount = Number.parseFloat(trimmed);
+    return Number.isFinite(amount) ? amount : null;
+  }
+
+  return null;
 }
 
 function findAnimationName(el: Element): string | null {
@@ -44,8 +65,9 @@ function collectAnimItems(slide: Element, options: CarouselOptions): AnimItem[] 
     const dur = getDataNumber(el, "data-dur", options.defaults.dur);
     const delay = getDataNumber(el, "data-delay", 0);
     const ease = getDataString(el, "data-ease") ?? options.defaults.ease;
+    const at = getDataString(el, "data-at");
 
-    items.push({ el, animName, seq, dur, delay, ease });
+    items.push({ el, animName, seq, dur, delay, ease, at });
   });
 
   return items;
@@ -82,6 +104,9 @@ export function buildSlideEnterTimeline(
     group.forEach((item) => {
       const factory = getAnimation(item.animName);
       if (!factory) return;
+      const offset = parsePositionOffset(item.at) ?? 0;
+      const position = cursor + offset;
+
       factory({
         el: item.el,
         tl,
@@ -91,13 +116,13 @@ export function buildSlideEnterTimeline(
           delay: item.delay,
           ease: item.ease,
           direction,
-          at: cursor
+          at: position
         }
       });
-      groupMax = Math.max(groupMax, item.delay + item.dur);
+      groupMax = Math.max(groupMax, offset + item.delay + item.dur);
     });
 
-    cursor += groupMax;
+    cursor += Math.max(groupMax, 0);
   });
 
   return tl;
@@ -125,6 +150,8 @@ export function buildSlideExitTimeline(
       const exitName = getDataString(item.el, "data-exit");
       const factory = exitName ? getAnimation(exitName) : getAnimation(item.animName);
       const reverseFactory = factory && "reverse" in factory ? factory.reverse : undefined;
+      const offset = parsePositionOffset(item.at) ?? 0;
+      const position = cursor + offset;
 
       let usedDuration = item.dur;
 
@@ -138,7 +165,7 @@ export function buildSlideExitTimeline(
             delay: item.delay,
             ease: item.ease,
             direction,
-            at: cursor
+            at: position
           }
         });
       } else if (!exitName && reverseFactory) {
@@ -151,7 +178,7 @@ export function buildSlideExitTimeline(
             delay: item.delay,
             ease: item.ease,
             direction,
-            at: cursor
+            at: position
           }
         });
       } else {
@@ -164,14 +191,14 @@ export function buildSlideExitTimeline(
             delay: item.delay,
             ease: item.ease
           },
-          cursor
+          position
         );
       }
 
-      groupMax = Math.max(groupMax, item.delay + usedDuration);
+      groupMax = Math.max(groupMax, offset + item.delay + usedDuration);
     });
 
-    cursor += groupMax;
+    cursor += Math.max(groupMax, 0);
   });
 
   return tl;

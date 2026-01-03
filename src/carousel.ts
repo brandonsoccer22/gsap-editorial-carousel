@@ -137,22 +137,23 @@ export function createCarousel(
     goTo(index);
   };
 
-  const onKeydown = (event: KeyboardEvent) => {
-    if (animating) return;
-    if (!isFocusableWithin(root, document.activeElement)) return;
-    if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      prev();
-    } else if (event.key === "ArrowRight") {
-      event.preventDefault();
-      next();
-    }
-  };
+  // const onKeydown = (event: KeyboardEvent) => {
+  //   if (animating) return;
+  //   if (!isFocusableWithin(root, document.activeElement)) return;
+  //   if (event.key === "ArrowLeft") {
+  //     event.preventDefault();
+  //     prev();
+  //   } else if (event.key === "ArrowRight") {
+  //     event.preventDefault();
+  //     next();
+  //   }
+  // };
 
   controls.prev?.addEventListener("click", onPrevClick);
   controls.next?.addEventListener("click", onNextClick);
   controls.dotsContainer?.addEventListener("click", onDotsClick);
-  root.addEventListener("keydown", onKeydown);
+  //if enabled in the future, also enable root.removeEventListener("keydown", onKeydown); below
+  //root.addEventListener("keydown", onKeydown);
 
   const instance: CarouselInstance = {
     goTo,
@@ -253,7 +254,7 @@ export function createCarousel(
     controls.prev?.removeEventListener("click", onPrevClick);
     controls.next?.removeEventListener("click", onNextClick);
     controls.dotsContainer?.removeEventListener("click", onDotsClick);
-    root.removeEventListener("keydown", onKeydown);
+    //root.removeEventListener("keydown", onKeydown);
 
     state.activeTimeline?.kill();
     animating = false;
@@ -273,9 +274,18 @@ export function createCarousel(
 }
 
 function resolveControls(root: Element, options: CarouselOptions, slideCount: number): ResolvedControls {
-  const prev = qs(root, options.selectors.prev);
-  const next = qs(root, options.selectors.next);
-  const dotsContainer = qs<HTMLElement>(root, options.selectors.dots);
+  const rootId = root.getAttribute("id");
+  const queryWithFallback = <T extends Element>(selector: string): T | null => {
+    if (rootId) {
+      const scoped = document.querySelector<T>(`${selector}[data-for="${rootId}"]`);
+      if (scoped) return scoped;
+    }
+    return qs<T>(root, selector);
+  };
+
+  const prev = queryWithFallback<Element>(options.selectors.prev);
+  const next = queryWithFallback<Element>(options.selectors.next);
+  const dotsContainer = queryWithFallback<HTMLElement>(options.selectors.dots);
   const dotTemplate = dotsContainer ? qs<HTMLElement>(dotsContainer, options.selectors.dotTemplate) : null;
 
   const dots = dotsContainer

@@ -98,6 +98,7 @@ registerAnimation("pop-in", popIn);
 - `data-seq="1"` sequence group (integer, default 1)
 - `data-dur="0.6"` duration in seconds (default from options)
 - `data-delay="0"` delay in seconds (default 0)
+- `data-at="-=0.4"` position offset in seconds for this element within its sequence; supports `+=`/`-=` or a plain number
 - `data-ease="power2.out"` GSAP ease string
 - `data-exit="fade-in"` explicit exit animation name
 
