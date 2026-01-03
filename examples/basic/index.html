@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editorial Carousel Demo</title>
+  </head>
+  <body>
+    <div class="page">
+      <header class="page__header">
+        <div>
+          <p class="eyebrow">Editorial Carousel</p>
+          <h1>CMS-ready motion with GSAP timelines.</h1>
+          <p class="lede">
+            Slides own their layout, the carousel wires the animations. Use arrows or
+            dots to navigate.
+          </p>
+        </div>
+        <div class="page__controls">
+          <a class="ghost" href="/">All examples</a>
+          <div class="control-set">
+            <button data-carousel-prev data-for="editorial-carousel" class="icon">Prev</button>
+            <button data-carousel-next data-for="editorial-carousel" class="icon">Next</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="carousel" data-carousel id="editorial-carousel">
+        <div class="slides">
+          <article class="slide" data-carousel-slide>
+            <div class="slide__media">
+              <div class="badge">Issue 14</div>
+              <h2 class="fade-up" data-seq="1">Crafting the morning ritual.</h2>
+              <p class="fade-in" data-seq="2" data-dur="0.45">
+                A short study in layered light, coffee, and the soundtrack of rain.
+              </p>
+            </div>
+            <div class="slide__footer fade-in" data-seq="3" data-delay="0.05">
+              <span>Feature • 6 min read</span>
+              <button class="pill">Read story</button>
+            </div>
+          </article>
+
+          <article class="slide" data-carousel-slide>
+            <div class="slide__media">
+              <div class="badge">Issue 15</div>
+              <h2 class="slide-in" data-seq="1">The quiet roar of new cities.</h2>
+              <p class="fade-in" data-seq="2">
+                How architects frame movement and light in third places.
+              </p>
+            </div>
+            <div class="slide__footer fade-up" data-seq="3" data-delay="0.1">
+              <span>Profile • 8 min read</span>
+              <button class="pill">View interview</button>
+            </div>
+          </article>
+
+          <article class="slide" data-carousel-slide>
+            <div class="slide__media">
+              <div class="badge">Issue 16</div>
+              <h2 class="fade-up" data-seq="1">Velvet nights & neon type.</h2>
+              <p class="fade-in" data-seq="2" data-dur="0.5">
+                Designing editorial spaces that glow after dark.
+              </p>
+            </div>
+            <div class="slide__footer fade-in" data-seq="3" data-delay="0.08">
+              <span>Essay • 5 min read</span>
+              <button class="pill">Explore theme</button>
+            </div>
+          </article>
+        </div>
+
+        <div class="dots" data-carousel-dots data-for="editorial-carousel">
+          <button class="dot" data-carousel-dot-template data-for="editorial-carousel" aria-label="Go to slide"></button>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

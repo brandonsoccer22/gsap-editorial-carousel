@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GSAP Carousel Examples</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at top, #f8f5f1, #e8edf2 65%, #dbe3ea);
+        color: #141414;
+      }
+
+      main {
+        width: min(640px, 90vw);
+        padding: 48px 40px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 20px 60px rgba(40, 50, 60, 0.2);
+        backdrop-filter: blur(8px);
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(1.8rem, 3vw, 2.4rem);
+        letter-spacing: -0.02em;
+      }
+
+      p {
+        margin: 0 0 24px;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #3d4652;
+      }
+
+      a {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 18px;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 600;
+        background: #0b151f;
+        color: #f4f4f4;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(15, 25, 40, 0.25);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>GSAP Carousel Examples</h1>
+      <p>
+        Run the carousel examples locally with Vite. Add new folders under
+        <code>examples/</code> and link them here.
+      </p>
+      <a href="/basic/">Open Basic Editorial Demo</a>
+    </main>
+  </body>
+</html>
