@@ -1,0 +1,43 @@
+{
+  "name": "@acme/gsap-carousel",
+  "version": "0.1.0",
+  "description": "A small, class-driven GSAP carousel controller with CMS-friendly animations.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./styles.css"
+  },
+  "files": [
+    "dist",
+    "styles.css",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "gsap": "^3.12.0"
+  },
+  "devDependencies": {
+    "gsap": "^3.12.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.4.0"
+  },
+  "keywords": [
+    "gsap",
+    "carousel",
+    "animation",
+    "typescript"
+  ],
+  "license": "MIT"
+}
