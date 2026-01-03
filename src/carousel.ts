@@ -32,6 +32,7 @@ export type AnimationFactory = (ctx: AnimationFactoryContext) => void;
 export type CarouselOptions = {
   loop: boolean;
   initialIndex: number;
+  gsap?: typeof gsap;
   selectors: {
     root: string;
     slide: string;
@@ -87,8 +88,9 @@ export function createCarousel(
   ensureDefaultAnimationsRegistered();
 
   const root = resolveRoot(rootInput);
+  const gsapInstance = options.gsap ?? gsap;
   ensureRootFocusable(root);
-  const ctx = gsap.context(() => {}, root);
+  const ctx = gsapInstance.context(() => {}, root);
 
   const resolved: CarouselOptions = {
     loop: options.loop ?? defaultOptions.loop,
@@ -211,12 +213,12 @@ export function createCarousel(
       return;
     }
 
-    const exitTl = ctx.add(() => buildSlideExitTimeline(slides[from], direction, resolved)) as gsap.core.Timeline;
-    const enterTl = ctx.add(() => buildSlideEnterTimeline(slides[to], direction, resolved)) as gsap.core.Timeline;
+    const exitTl = ctx.add(() => buildSlideExitTimeline(slides[from], direction, resolved, gsapInstance)) as gsap.core.Timeline;
+    const enterTl = ctx.add(() => buildSlideEnterTimeline(slides[to], direction, resolved, gsapInstance)) as gsap.core.Timeline;
 
     const master = ctx.add(
       () =>
-        gsap.timeline({
+        gsapInstance.timeline({
           onComplete: () => {
             finalizeTransition(from, to, direction);
           }

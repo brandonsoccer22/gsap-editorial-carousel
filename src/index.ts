@@ -6,4 +6,5 @@ export type {
 } from "./carousel";
 
 export { createCarousel } from "./carousel";
+export { registerGsapPlugins } from "./gsap";
 export { registerAnimation, registerAnimations } from "./registry";

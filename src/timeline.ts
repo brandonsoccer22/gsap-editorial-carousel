@@ -1,8 +1,9 @@
-import { gsap } from "gsap";
+import type { gsap as GsapInstance } from "gsap";
 import type { CarouselOptions } from "./carousel";
 import { getAnimation, listAnimations } from "./registry";
 
 const defaultExitDuration = 0.25;
+type GsapTimeline = ReturnType<typeof GsapInstance["timeline"]>;
 
 type AnimItem = {
   el: Element;
@@ -86,9 +87,10 @@ function groupBySequence(items: AnimItem[]): Map<number, AnimItem[]> {
 export function buildSlideEnterTimeline(
   slide: Element,
   direction: 1 | -1,
-  options: CarouselOptions
-): gsap.core.Timeline {
-  const tl = gsap.timeline();
+  options: CarouselOptions,
+  gsapInstance: typeof GsapInstance
+): GsapTimeline {
+  const tl = gsapInstance.timeline();
   const items = collectAnimItems(slide, options);
   if (!items.length) return tl;
 
@@ -110,7 +112,7 @@ export function buildSlideEnterTimeline(
       factory({
         el: item.el,
         tl,
-        gsap,
+        gsap: gsapInstance,
         opts: {
           dur: item.dur,
           delay: item.delay,
@@ -131,9 +133,10 @@ export function buildSlideEnterTimeline(
 export function buildSlideExitTimeline(
   slide: Element,
   direction: 1 | -1,
-  options: CarouselOptions
-): gsap.core.Timeline {
-  const tl = gsap.timeline();
+  options: CarouselOptions,
+  gsapInstance: typeof GsapInstance
+): GsapTimeline {
+  const tl = gsapInstance.timeline();
   const items = collectAnimItems(slide, options);
   if (!items.length) return tl;
 
@@ -159,7 +162,7 @@ export function buildSlideExitTimeline(
         factory({
           el: item.el,
           tl,
-          gsap,
+          gsap: gsapInstance,
           opts: {
             dur: item.dur,
             delay: item.delay,
@@ -172,7 +175,7 @@ export function buildSlideExitTimeline(
         reverseFactory({
           el: item.el,
           tl,
-          gsap,
+          gsap: gsapInstance,
           opts: {
             dur: item.dur,
             delay: item.delay,
