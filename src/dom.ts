@@ -1,10 +1,16 @@
-export function resolveRoot(root: string | Element): Element {
+export function resolveRoot(root: string | Element): HTMLElement {
   if (typeof root === "string") {
     const el = document.querySelector(root);
     if (!el) {
       throw new Error(`Carousel root not found for selector: ${root}`);
     }
+    if (!(el instanceof HTMLElement)) {
+      throw new Error(`Carousel root must be an HTMLElement for selector: ${root}`);
+    }
     return el;
+  }
+  if (!(root instanceof HTMLElement)) {
+    throw new Error("Carousel root must be an HTMLElement.");
   }
   return root;
 }
@@ -47,7 +53,7 @@ export function isFocusableWithin(root: Element, target: Element | null): boolea
   return !!target && root.contains(target);
 }
 
-export function ensureRootFocusable(root: Element): void {
+export function ensureRootFocusable(root: HTMLElement): void {
   if (!root.hasAttribute("tabindex")) {
     root.setAttribute("tabindex", "0");
   }

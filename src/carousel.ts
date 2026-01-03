@@ -69,8 +69,8 @@ export type CarouselInstance = {
 type ResolvedControls = {
   prev: Element | null;
   next: Element | null;
-  dotsContainer: Element | null;
-  dotTemplate: Element | null;
+  dotsContainer: HTMLElement | null;
+  dotTemplate: HTMLElement | null;
   dots: Element[];
 };
 
@@ -275,8 +275,8 @@ export function createCarousel(
 function resolveControls(root: Element, options: CarouselOptions, slideCount: number): ResolvedControls {
   const prev = qs(root, options.selectors.prev);
   const next = qs(root, options.selectors.next);
-  const dotsContainer = qs(root, options.selectors.dots);
-  const dotTemplate = dotsContainer ? qs(dotsContainer, options.selectors.dotTemplate) : null;
+  const dotsContainer = qs<HTMLElement>(root, options.selectors.dots);
+  const dotTemplate = dotsContainer ? qs<HTMLElement>(dotsContainer, options.selectors.dotTemplate) : null;
 
   const dots = dotsContainer
     ? setupDots(dotsContainer, dotTemplate, options, slideCount)
@@ -286,8 +286,8 @@ function resolveControls(root: Element, options: CarouselOptions, slideCount: nu
 }
 
 function setupDots(
-  container: Element,
-  template: Element | null,
+  container: HTMLElement,
+  template: HTMLElement | null,
   options: CarouselOptions,
   slideCount: number
 ): Element[] {
