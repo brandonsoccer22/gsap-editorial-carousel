@@ -8,7 +8,7 @@ Content editors can add animation classes and data attributes directly in a CMS 
 ## Install
 
 ```bash
-npm install @brandonsoccer22/gsap-carousel gsap
+npm i @brandonsoccer22/gsap-editorial-carousel gsap
 ```
 
 ## Markup (semantic + user-placed controls)
