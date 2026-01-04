@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/brandonsoccer22/gsap-editorial-carousel"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A small, class-driven GSAP carousel controller with CMS-friendly animations.",
   "type": "module",
   "main": "./dist/index.cjs",
