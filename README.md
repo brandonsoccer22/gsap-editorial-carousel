@@ -45,6 +45,7 @@ npm install @acme/gsap-carousel gsap
 ## Usage
 
 ```ts
+import "@acme/gsap-carousel/styles.css";
 import { createCarousel } from "@acme/gsap-carousel";
 
 const carousel = createCarousel("[data-carousel]", {
@@ -56,6 +57,10 @@ const carousel = createCarousel("[data-carousel]", {
 carousel.next();
 carousel.goTo(2, { immediate: false });
 ```
+
+The base stylesheet only controls slide visibility (`.is-active`) and disabled controls; layout remains entirely up to you.
+Optional helper: add `.gsap-carousel__stack` to a slides wrapper to stack slides with `position: absolute`.
+Slides can use `data-carousel-slide` or the optional `.gsap-carousel__slide` class; both work with `.gsap-carousel__stack`.
 
 ## Transition lock behavior
 While animating, all navigation requests are ignored and controls are disabled (buttons get `disabled`, everything gets `aria-disabled`).
@@ -94,8 +99,67 @@ popIn.reverse = ({ el, tl, opts }) => {
 registerAnimation("pop-in", popIn);
 ```
 
+Example with SplitText + overlap
+
+```ts
+import type { AnimationFactory } from "@acme/gsap-carousel";
+import { createCarousel, registerAnimation, registerGsapPlugins } from "@acme/gsap-carousel";
+import { gsap } from "gsap";
+import SplitText from "gsap/SplitText";
+
+registerGsapPlugins(SplitText);
+
+const splitLines: AnimationFactory = ({ el, tl, gsap, opts }) => {
+  const split = new SplitText(el, { type: "lines" });
+
+  gsap.set(split.lines, { yPercent: -120, opacity: 0 });
+
+  tl.to(
+    split.lines,
+    {
+      yPercent: 0,
+      opacity: 1,
+      duration: opts.dur,
+      ease: opts.ease,
+      stagger: 0.06
+    },
+    opts.at
+  );
+
+  tl.add(() => split.revert(), ">");
+};
+
+registerAnimation("split-lines", splitLines);
+
+const splitLinesExit: AnimationFactory = ({ el, tl, opts }) => {
+  const split = new SplitText(el, { type: "lines" });
+
+  tl.to(
+    split.lines,
+    {
+      yPercent: 40,
+      opacity: 0,
+      duration: Math.min(opts.dur, 0.55),
+      ease: opts.ease,
+      stagger: 0.05
+    },
+    opts.at
+  );
+
+  tl.add(() => split.revert(), ">");
+};
+
+registerAnimation("split-lines-exit", splitLinesExit);
+
+createCarousel("[data-carousel]", {
+  gsap,
+  transition: { overlap: 0.05 }
+});
+```
+
 ## Data attributes reference
 - `data-seq="1"` sequence group (integer, default 1)
+- `data-exit-seq="1"` exit sequence group (integer, defaults to `data-seq`)
 - `data-dur="0.6"` duration in seconds (default from options)
 - `data-delay="0"` delay in seconds (default 0)
 - `data-at="-=0.4"` position offset in seconds for this element within its sequence; supports `+=`/`-=` or a plain number
