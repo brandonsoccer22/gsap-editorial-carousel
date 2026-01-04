@@ -1,4 +1,4 @@
-# @acme/gsap-carousel
+# @brandonsoccer22/gsap-carousel
 
 A small, class-driven GSAP carousel controller that handles state, accessibility, animation orchestration, and dot cloning without enforcing layout. You own the markup and CSS; the library handles wiring.
 
@@ -8,7 +8,7 @@ Content editors can add animation classes and data attributes directly in a CMS 
 ## Install
 
 ```bash
-npm install @acme/gsap-carousel gsap
+npm install @brandonsoccer22/gsap-carousel gsap
 ```
 
 ## Markup (semantic + user-placed controls)
@@ -45,8 +45,8 @@ npm install @acme/gsap-carousel gsap
 ## Usage
 
 ```ts
-import "@acme/gsap-carousel/styles.css";
-import { createCarousel } from "@acme/gsap-carousel";
+import "@brandonsoccer22/gsap-carousel/styles.css";
+import { createCarousel } from "@brandonsoccer22/gsap-carousel";
 
 const carousel = createCarousel("[data-carousel]", {
   loop: true,
@@ -79,8 +79,8 @@ If multiple classes match registered animation names, the first match in `classL
 ## Custom animation registration
 
 ```ts
-import { registerAnimation } from "@acme/gsap-carousel";
-import type { AnimationFactory } from "@acme/gsap-carousel";
+import { registerAnimation } from "@brandonsoccer22/gsap-carousel";
+import type { AnimationFactory } from "@brandonsoccer22/gsap-carousel";
 
 const popIn: AnimationFactory = ({ el, tl, opts }) => {
   tl.fromTo(
@@ -102,8 +102,8 @@ registerAnimation("pop-in", popIn);
 Example with SplitText + overlap
 
 ```ts
-import type { AnimationFactory } from "@acme/gsap-carousel";
-import { createCarousel, registerAnimation, registerGsapPlugins } from "@acme/gsap-carousel";
+import type { AnimationFactory } from "@brandonsoccer22/gsap-carousel";
+import { createCarousel, registerAnimation, registerGsapPlugins } from "@brandonsoccer22/gsap-carousel";
 import { gsap } from "gsap";
 import SplitText from "gsap/SplitText";
 
