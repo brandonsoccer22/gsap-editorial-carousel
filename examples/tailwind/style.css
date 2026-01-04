@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .carousel-slide {
+    @apply pointer-events-none absolute inset-0 grid gap-6 opacity-0;
+  }
+
+  .carousel-slide.is-active {
+    @apply pointer-events-auto opacity-100;
+  }
+
+  .carousel-dot,
+  .gsap-carousel__dot {
+    @apply h-2 w-2 rounded-full bg-white/30 transition;
+  }
+
+  .gsap-carousel__dot.is-active {
+    @apply scale-125 bg-amber-300;
+  }
+}
