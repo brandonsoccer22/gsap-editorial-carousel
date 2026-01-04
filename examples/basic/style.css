@@ -113,13 +113,6 @@ body {
   inset: 0;
   display: grid;
   gap: 24px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.slide.is-active {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .slide__media h2 {
