@@ -9,6 +9,7 @@ type AnimItem = {
   el: Element;
   animName: string;
   seq: number;
+  exitSeq: number;
   dur: number;
   delay: number;
   ease?: string;
@@ -63,23 +64,28 @@ function collectAnimItems(slide: Element, options: CarouselOptions): AnimItem[] 
     const animName = findAnimationName(el);
     if (!animName) return;
     const seq = Math.max(1, Math.floor(getDataNumber(el, "data-seq", 1)));
+    const exitSeq = Math.max(1, Math.floor(getDataNumber(el, "data-exit-seq", seq)));
     const dur = getDataNumber(el, "data-dur", options.defaults.dur);
     const delay = getDataNumber(el, "data-delay", 0);
     const ease = getDataString(el, "data-ease") ?? options.defaults.ease;
     const at = getDataString(el, "data-at");
 
-    items.push({ el, animName, seq, dur, delay, ease, at });
+    items.push({ el, animName, seq, exitSeq, dur, delay, ease, at });
   });
 
   return items;
 }
 
-function groupBySequence(items: AnimItem[]): Map<number, AnimItem[]> {
+function groupBySequence(
+  items: AnimItem[],
+  getSequence: (item: AnimItem) => number
+): Map<number, AnimItem[]> {
   const map = new Map<number, AnimItem[]>();
   items.forEach((item) => {
-    const bucket = map.get(item.seq) ?? [];
+    const sequence = getSequence(item);
+    const bucket = map.get(sequence) ?? [];
     bucket.push(item);
-    map.set(item.seq, bucket);
+    map.set(sequence, bucket);
   });
   return map;
 }
@@ -94,7 +100,7 @@ export function buildSlideEnterTimeline(
   const items = collectAnimItems(slide, options);
   if (!items.length) return tl;
 
-  const grouped = groupBySequence(items);
+  const grouped = groupBySequence(items, (item) => item.seq);
   const order = Array.from(grouped.keys()).sort((a, b) => a - b);
 
   let cursor = 0;
@@ -140,7 +146,7 @@ export function buildSlideExitTimeline(
   const items = collectAnimItems(slide, options);
   if (!items.length) return tl;
 
-  const grouped = groupBySequence(items);
+  const grouped = groupBySequence(items, (item) => item.exitSeq);
   const order = Array.from(grouped.keys()).sort((a, b) => a - b);
 
   let cursor = 0;

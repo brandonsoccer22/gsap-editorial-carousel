@@ -21,6 +21,9 @@ export const defaultClassNames = {
 export const defaultOptions = {
   loop: true,
   initialIndex: 0,
+  transition: {
+    overlap: 0
+  },
   defaults: {
     dur: 0.6,
     ease: "power2.out"

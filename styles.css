@@ -3,6 +3,36 @@
   pointer-events: none;    
 }
 
+/* Base visibility only; layout remains user-controlled. */
+[data-carousel] [data-carousel-slide],
+[data-carousel] .gsap-carousel__slide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-carousel] [data-carousel-slide].is-active,
+[data-carousel] .gsap-carousel__slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Optional layout helper (.gsap-carousel__stack): opt in when you want slides stacked. */
+.gsap-carousel__stack {
+  position: relative;
+}
+
+.gsap-carousel__stack [data-carousel-slide],
+.gsap-carousel__stack .gsap-carousel__slide {
+  position: absolute;
+  inset: 0;
+}
+
+/* Keep the active slide in flow so the stack can size to its content. */
+.gsap-carousel__stack [data-carousel-slide].is-active {
+  position: relative;
+  inset: auto;
+}
+
 /* Set the point for the entire slide */
 /* .is-animating {
   cursor: progress;

@@ -52,6 +52,9 @@ export type CarouselOptions = {
     dur: number;
     ease: string;
   };
+  transition: {
+    overlap: number;
+  };
   onInit?: (instance: CarouselInstance) => void;
   onBeforeChange?: (payload: { from: number; to: number; direction: 1 | -1 }) => void;
   onAfterChange?: (payload: { from: number; to: number; direction: 1 | -1 }) => void;
@@ -95,6 +98,7 @@ export function createCarousel(
   const resolved: CarouselOptions = {
     loop: options.loop ?? defaultOptions.loop,
     initialIndex: options.initialIndex ?? defaultOptions.initialIndex,
+    transition: { ...defaultOptions.transition, ...options.transition },
     selectors: { ...defaultSelectors, ...options.selectors },
     classNames: { ...defaultClassNames, ...options.classNames },
     defaults: { ...defaultOptions.defaults, ...options.defaults },
@@ -226,9 +230,11 @@ export function createCarousel(
     ) as gsap.core.Timeline;
 
     state.activeTimeline = master;
+    const overlap = Math.max(0, resolved.transition.overlap);
+    const enterAt = Math.max(0, exitTl.duration() - overlap);
     master.add(exitTl, 0);
-    master.add(() => applyActiveState(to), exitTl.duration());
-    master.add(enterTl, exitTl.duration());
+    master.add(() => applyActiveState(to), enterAt);
+    master.add(enterTl, enterAt);
   }
 
   function goTo(index: number, opts?: { immediate?: boolean }): void {
