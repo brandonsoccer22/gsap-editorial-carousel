@@ -1,4 +1,4 @@
-.is-disabled  {
+.is-disabled:not([data-carousel-disable-opacity="true"])  {
   opacity: 0.5;
   pointer-events: none;    
 }
@@ -7,7 +7,8 @@
 [data-carousel] [data-carousel-slide],
 [data-carousel] .gsap-carousel__slide {
   opacity: 0;
-  pointer-events: none;
+  pointer-events: none !important;
+  cursor: default !important;
 }
 
 [data-carousel] [data-carousel-slide].is-active,

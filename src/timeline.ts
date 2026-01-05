@@ -2,7 +2,6 @@ import type { gsap as GsapInstance } from "gsap";
 import type { CarouselOptions } from "./carousel";
 import { getAnimation, listAnimations } from "./registry";
 
-const defaultExitDuration = 0.25;
 type GsapTimeline = ReturnType<typeof GsapInstance["timeline"]>;
 
 type AnimItem = {
@@ -13,6 +12,9 @@ type AnimItem = {
   dur: number;
   delay: number;
   ease?: string;
+  exitDur: number;
+  exitDelay: number;
+  exitEase?: string;
   at?: string;
 };
 
@@ -56,11 +58,33 @@ function findAnimationName(el: Element): string | null {
   return null;
 }
 
+function collectExternalControls(slide: Element, options: CarouselOptions): Element[] {
+  const root = slide.closest(options.selectors.root);
+  if (!root) return [];
+
+  const rootId = root.getAttribute("id");
+  const selector = `${options.selectors.prev}, ${options.selectors.next}`;
+  let candidates: Element[] = [];
+
+  if (rootId) {
+    const scopedSelector = `${selector}[data-for="${rootId}"]`;
+    candidates = Array.from(document.querySelectorAll(scopedSelector));
+    if (!candidates.length) {
+      candidates = Array.from(root.querySelectorAll(selector));
+    }
+  } else {
+    candidates = Array.from(root.querySelectorAll(selector));
+  }
+
+  return candidates.filter((el) => !el.closest(options.selectors.slide));
+}
+
 function collectAnimItems(slide: Element, options: CarouselOptions): AnimItem[] {
   const elements = Array.from(slide.querySelectorAll("[class]"));
+  const externalControls = collectExternalControls(slide, options);
   const items: AnimItem[] = [];
 
-  elements.forEach((el) => {
+  elements.concat(externalControls).forEach((el) => {
     const animName = findAnimationName(el);
     if (!animName) return;
     const seq = Math.max(1, Math.floor(getDataNumber(el, "data-seq", 1)));
@@ -68,9 +92,12 @@ function collectAnimItems(slide: Element, options: CarouselOptions): AnimItem[] 
     const dur = getDataNumber(el, "data-dur", options.defaults.dur);
     const delay = getDataNumber(el, "data-delay", 0);
     const ease = getDataString(el, "data-ease") ?? options.defaults.ease;
+    const exitDur = getDataNumber(el, "data-exit-dur", dur);
+    const exitDelay = getDataNumber(el, "data-exit-delay", delay);
+    const exitEase = getDataString(el, "data-exit-ease") ?? ease;
     const at = getDataString(el, "data-at");
 
-    items.push({ el, animName, seq, exitSeq, dur, delay, ease, at });
+    items.push({ el, animName, seq, exitSeq, dur, delay, ease, exitDur, exitDelay, exitEase, at });
   });
 
   return items;
@@ -162,7 +189,7 @@ export function buildSlideExitTimeline(
       const offset = parsePositionOffset(item.at) ?? 0;
       const position = cursor + offset;
 
-      let usedDuration = item.dur;
+      let usedDuration = item.exitDur;
 
       if (exitName && factory) {
         factory({
@@ -170,9 +197,9 @@ export function buildSlideExitTimeline(
           tl,
           gsap: gsapInstance,
           opts: {
-            dur: item.dur,
-            delay: item.delay,
-            ease: item.ease,
+            dur: item.exitDur,
+            delay: item.exitDelay,
+            ease: item.exitEase,
             direction,
             at: position
           }
@@ -183,28 +210,27 @@ export function buildSlideExitTimeline(
           tl,
           gsap: gsapInstance,
           opts: {
-            dur: item.dur,
-            delay: item.delay,
-            ease: item.ease,
+            dur: item.exitDur,
+            delay: item.exitDelay,
+            ease: item.exitEase,
             direction,
             at: position
           }
         });
       } else {
-        usedDuration = Math.min(item.dur, defaultExitDuration);
         tl.to(
           item.el,
           {
             autoAlpha: 0,
             duration: usedDuration,
-            delay: item.delay,
-            ease: item.ease
+            delay: item.exitDelay,
+            ease: item.exitEase
           },
           position
         );
       }
 
-      groupMax = Math.max(groupMax, offset + item.delay + usedDuration);
+      groupMax = Math.max(groupMax, offset + item.exitDelay + usedDuration);
     });
 
     cursor += Math.max(groupMax, 0);

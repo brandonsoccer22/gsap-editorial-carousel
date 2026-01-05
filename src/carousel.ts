@@ -54,6 +54,7 @@ export type CarouselOptions = {
   };
   transition: {
     overlap: number;
+    exitOverlap?: number;
   };
   onInit?: (instance: CarouselInstance) => void;
   onBeforeChange?: (payload: { from: number; to: number; direction: 1 | -1 }) => void;
@@ -71,11 +72,11 @@ export type CarouselInstance = {
 };
 
 type ResolvedControls = {
-  prev: Element | null;
-  next: Element | null;
-  dotsContainer: HTMLElement | null;
-  dotTemplate: HTMLElement | null;
-  dots: Element[];
+  prev: Element[];
+  next: Element[];
+  dotsContainers: HTMLElement[];
+  dotTemplates: Array<HTMLElement | null>;
+  dots: Element[][];
 };
 
 type TransitionState = {
@@ -120,7 +121,7 @@ export function createCarousel(
   let animating = false;
 
   setSlidesState(slides, currentIndex, resolved.classNames.activeSlide);
-  setDotsState(controls.dots, currentIndex, resolved.classNames.activeDot);
+  setAllDotsState(currentIndex);
 
   const onPrevClick = (event: Event) => {
     event.preventDefault();
@@ -140,7 +141,11 @@ export function createCarousel(
     if (!indexAttr) return;
     const index = Number.parseInt(indexAttr, 10);
     if (!Number.isFinite(index)) return;
-    goTo(index);
+    if (animating) return;
+    const nextIndex = normalizeIndex(index, slides.length, resolved.loop);
+    if (nextIndex === currentIndex) return;
+    setAllDotsState(nextIndex);
+    goTo(nextIndex);
   };
 
   // const onKeydown = (event: KeyboardEvent) => {
@@ -155,9 +160,9 @@ export function createCarousel(
   //   }
   // };
 
-  controls.prev?.addEventListener("click", onPrevClick);
-  controls.next?.addEventListener("click", onNextClick);
-  controls.dotsContainer?.addEventListener("click", onDotsClick);
+  controls.prev.forEach((control) => control.addEventListener("click", onPrevClick));
+  controls.next.forEach((control) => control.addEventListener("click", onNextClick));
+  controls.dotsContainers.forEach((container) => container.addEventListener("click", onDotsClick));
   //if enabled in the future, also enable root.removeEventListener("keydown", onKeydown); below
   //root.addEventListener("keydown", onKeydown);
 
@@ -175,21 +180,33 @@ export function createCarousel(
 
   function disableControls(disabled: boolean): void {
     toggleClass(root, resolved.classNames.animatingRoot, disabled);
-    setDisabled(controls.prev, disabled, resolved.classNames.disabledControl);
-    setDisabled(controls.next, disabled, resolved.classNames.disabledControl);
-    if (controls.dotsContainer) {
-      setAriaDisabled(controls.dotsContainer, disabled);
-    }
-    controls.dots.forEach((dot) => {
-      setAriaDisabled(dot, disabled);
-      toggleClass(dot, resolved.classNames.disabledControl, disabled);
+    controls.prev.forEach((control) => {
+      setDisabled(control, disabled, resolved.classNames.disabledControl);
+    });
+    controls.next.forEach((control) => {
+      setDisabled(control, disabled, resolved.classNames.disabledControl);
+    });
+    controls.dotsContainers.forEach((container) => {
+      setAriaDisabled(container, disabled);
+    });
+    controls.dots.forEach((dotGroup) => {
+      dotGroup.forEach((dot) => {
+        setAriaDisabled(dot, disabled);
+        toggleClass(dot, resolved.classNames.disabledControl, disabled);
+      });
+    });
+  }
+
+  function setAllDotsState(activeIndex: number): void {
+    controls.dots.forEach((dotGroup) => {
+      setDotsState(dotGroup, activeIndex, resolved.classNames.activeDot);
     });
   }
 
   function applyActiveState(nextIndex: number): void {
     currentIndex = nextIndex;
     setSlidesState(slides, currentIndex, resolved.classNames.activeSlide);
-    setDotsState(controls.dots, currentIndex, resolved.classNames.activeDot);
+    setAllDotsState(currentIndex);
   }
 
   function finalizeTransition(from: number, to: number, direction: 1 | -1): void {
@@ -230,7 +247,7 @@ export function createCarousel(
     ) as gsap.core.Timeline;
 
     state.activeTimeline = master;
-    const overlap = Math.max(0, resolved.transition.overlap);
+    const overlap = Math.max(0, resolved.transition.exitOverlap ?? resolved.transition.overlap);
     const enterAt = Math.max(0, exitTl.duration() - overlap);
     master.add(exitTl, 0);
     master.add(() => applyActiveState(to), enterAt);
@@ -248,6 +265,7 @@ export function createCarousel(
     if (animating) return;
     const nextIndex = resolveNextIndex(currentIndex, slides.length, resolved.loop);
     if (nextIndex === currentIndex) return;
+    setAllDotsState(nextIndex);
     transitionTo(nextIndex, opts?.immediate);
   }
 
@@ -255,27 +273,30 @@ export function createCarousel(
     if (animating) return;
     const nextIndex = resolvePrevIndex(currentIndex, slides.length, resolved.loop);
     if (nextIndex === currentIndex) return;
+    setAllDotsState(nextIndex);
     transitionTo(nextIndex, opts?.immediate);
   }
 
   function destroy(): void {
-    controls.prev?.removeEventListener("click", onPrevClick);
-    controls.next?.removeEventListener("click", onNextClick);
-    controls.dotsContainer?.removeEventListener("click", onDotsClick);
+    controls.prev.forEach((control) => control.removeEventListener("click", onPrevClick));
+    controls.next.forEach((control) => control.removeEventListener("click", onNextClick));
+    controls.dotsContainers.forEach((container) => container.removeEventListener("click", onDotsClick));
     //root.removeEventListener("keydown", onKeydown);
 
     state.activeTimeline?.kill();
     animating = false;
     ctx.revert();
 
-    if (controls.dotsContainer) {
-      controls.dotsContainer.querySelectorAll(generatedDotSelector).forEach((dot) => {
+    controls.dotsContainers.forEach((container) => {
+      container.querySelectorAll(generatedDotSelector).forEach((dot) => {
         dot.remove();
       });
-    }
-    if (controls.dotTemplate) {
-      controls.dotTemplate.hidden = false;
-    }
+    });
+    controls.dotTemplates.forEach((template) => {
+      if (template) {
+        template.hidden = false;
+      }
+    });
   }
 
   return instance;
@@ -283,24 +304,25 @@ export function createCarousel(
 
 function resolveControls(root: Element, options: CarouselOptions, slideCount: number): ResolvedControls {
   const rootId = root.getAttribute("id");
-  const queryWithFallback = <T extends Element>(selector: string): T | null => {
+  const queryAllWithFallback = <T extends Element>(selector: string): T[] => {
     if (rootId) {
-      const scoped = document.querySelector<T>(`${selector}[data-for="${rootId}"]`);
-      if (scoped) return scoped;
+      const scoped = Array.from(document.querySelectorAll<T>(`${selector}[data-for="${rootId}"]`));
+      if (scoped.length) return scoped;
     }
-    return qs<T>(root, selector);
+    return qsa<T>(root, selector);
   };
 
-  const prev = queryWithFallback<Element>(options.selectors.prev);
-  const next = queryWithFallback<Element>(options.selectors.next);
-  const dotsContainer = queryWithFallback<HTMLElement>(options.selectors.dots);
-  const dotTemplate = dotsContainer ? qs<HTMLElement>(dotsContainer, options.selectors.dotTemplate) : null;
+  const prev = queryAllWithFallback<Element>(options.selectors.prev);
+  const next = queryAllWithFallback<Element>(options.selectors.next);
+  const dotsContainers = queryAllWithFallback<HTMLElement>(options.selectors.dots);
+  const dotTemplates: Array<HTMLElement | null> = [];
+  const dots = dotsContainers.map((container) => {
+    const template = qs<HTMLElement>(container, options.selectors.dotTemplate);
+    dotTemplates.push(template);
+    return setupDots(container, template, options, slideCount);
+  });
 
-  const dots = dotsContainer
-    ? setupDots(dotsContainer, dotTemplate, options, slideCount)
-    : [];
-
-  return { prev, next, dotsContainer, dotTemplate, dots };
+  return { prev, next, dotsContainers, dotTemplates, dots };
 }
 
 function setupDots(
@@ -315,12 +337,18 @@ function setupDots(
   if (!template) return [];
 
   const clones: Element[] = [];
+  const disableOpacityAttr = template.getAttribute("data-carousel-disable-opacity");
 
   for (let i = 0; i < slideCount; i += 1) {
     const clone = template.cloneNode(true) as Element;
     clone.removeAttribute("id");
     clone.setAttribute("data-carousel-dot", "true");
     clone.setAttribute("data-carousel-dot-index", String(i));
+    if (disableOpacityAttr !== null) {
+      clone.setAttribute("data-carousel-disable-opacity", disableOpacityAttr);
+    } else {
+      clone.removeAttribute("data-carousel-disable-opacity");
+    }
     clone.setAttribute("aria-label", `Go to slide ${i + 1}`);
     clone.classList.add(options.classNames.dot);
     if (clone instanceof HTMLButtonElement && !clone.getAttribute("type")) {

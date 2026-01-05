@@ -8,6 +8,11 @@ export function setSlidesState(
   slides.forEach((slide, index) => {
     const isActive = index === activeIndex;
     slide.setAttribute("aria-hidden", isActive ? "false" : "true");
+    if (isActive) {
+      slide.removeAttribute("inert");
+    } else {
+      slide.setAttribute("inert", "");
+    }
     toggleClass(slide, activeClass, isActive);
   });
 }

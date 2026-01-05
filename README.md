@@ -153,17 +153,22 @@ registerAnimation("split-lines-exit", splitLinesExit);
 
 createCarousel("[data-carousel]", {
   gsap,
-  transition: { overlap: 0.05 }
+  transition: { overlap: 0.05, exitOverlap: 0.05 }
 });
 ```
+
+`transition.exitOverlap` controls how much the enter timeline overlaps the exit timeline; defaults to `transition.overlap`.
 
 ## Data attributes reference
 - `data-seq="1"` sequence group (integer, default 1)
 - `data-exit-seq="1"` exit sequence group (integer, defaults to `data-seq`)
 - `data-dur="0.6"` duration in seconds (default from options)
 - `data-delay="0"` delay in seconds (default 0)
+- `data-exit-dur="0.6"` exit duration in seconds (defaults to `data-dur`)
+- `data-exit-delay="0"` exit delay in seconds (defaults to `data-delay`)
 - `data-at="-=0.4"` position offset in seconds for this element within its sequence; supports `+=`/`-=` or a plain number
 - `data-ease="power2.out"` GSAP ease string
+- `data-exit-ease="power2.out"` exit ease string (defaults to `data-ease`)
 - `data-exit="fade-in"` explicit exit animation name
 
 ## Reduced motion
