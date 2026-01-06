@@ -235,11 +235,12 @@ Elements are grouped into sequence buckets and played in order. Within each sequ
 - `data-exit-dur="0.6"` exit duration in seconds (defaults to `data-dur`)
 - `data-exit-delay="0"` exit delay in seconds (defaults to `data-delay`)
 - `data-at="-=0.4"` position offset in seconds for this element within its sequence
+- `data-exit-at="-=0.2"` exit position offset in seconds (defaults to `data-at`)
 - `data-ease="power2.out"` GSAP ease string
 - `data-exit-ease="power2.out"` exit ease string (defaults to `data-ease`)
 - `data-exit="fade-in"` explicit exit animation name
 
-`data-at` supports absolute values (`0.2`) or relative offsets (`+=0.1`, `-=0.1`).
+`data-at` and `data-exit-at` support absolute values (`0.2`) or relative offsets (`+=0.1`, `-=0.1`).
 
 ## Dots + controls
 
