@@ -16,6 +16,7 @@ type AnimItem = {
   exitDelay: number;
   exitEase?: string;
   at?: string;
+  exitAt?: string;
 };
 
 function getDataNumber(el: Element, name: string, fallback: number): number {
@@ -96,8 +97,9 @@ function collectAnimItems(slide: Element, options: CarouselOptions): AnimItem[] 
     const exitDelay = getDataNumber(el, "data-exit-delay", delay);
     const exitEase = getDataString(el, "data-exit-ease") ?? ease;
     const at = getDataString(el, "data-at");
+    const exitAt = getDataString(el, "data-exit-at");
 
-    items.push({ el, animName, seq, exitSeq, dur, delay, ease, exitDur, exitDelay, exitEase, at });
+    items.push({ el, animName, seq, exitSeq, dur, delay, ease, exitDur, exitDelay, exitEase, at, exitAt });
   });
 
   return items;
@@ -139,7 +141,7 @@ export function buildSlideEnterTimeline(
     group.forEach((item) => {
       const factory = getAnimation(item.animName);
       if (!factory) return;
-      const offset = parsePositionOffset(item.at) ?? 0;
+      const offset = parsePositionOffset(item.exitAt ?? item.at) ?? 0;
       const position = cursor + offset;
 
       factory({
