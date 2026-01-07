@@ -141,7 +141,7 @@ export function buildSlideEnterTimeline(
     group.forEach((item) => {
       const factory = getAnimation(item.animName);
       if (!factory) return;
-      const offset = parsePositionOffset(item.exitAt ?? item.at) ?? 0;
+      const offset = parsePositionOffset(item.at) ?? 0;
       const position = cursor + offset;
 
       factory({
@@ -188,7 +188,7 @@ export function buildSlideExitTimeline(
       const exitName = getDataString(item.el, "data-exit");
       const factory = exitName ? getAnimation(exitName) : getAnimation(item.animName);
       const reverseFactory = factory && "reverse" in factory ? factory.reverse : undefined;
-      const offset = parsePositionOffset(item.at) ?? 0;
+      const offset = parsePositionOffset(item.exitAt ?? item.at) ?? 0;
       const position = cursor + offset;
 
       let usedDuration = item.exitDur;
