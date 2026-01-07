@@ -124,7 +124,7 @@ export function buildSlideEnterTimeline(
   direction: 1 | -1,
   options: CarouselOptions,
   gsapInstance: typeof GsapInstance
-): GsapTimeline {
+): GsapTimeline {  
   const tl = gsapInstance.timeline();
   const items = collectAnimItems(slide, options);
   if (!items.length) return tl;
@@ -143,20 +143,23 @@ export function buildSlideEnterTimeline(
       if (!factory) return;
       const offset = parsePositionOffset(item.at) ?? 0;
       const position = cursor + offset;
+      const itemTl = gsapInstance.timeline();
 
       factory({
         el: item.el,
-        tl,
+        tl: itemTl,
         gsap: gsapInstance,
         opts: {
           dur: item.dur,
           delay: item.delay,
           ease: item.ease,
           direction,
-          at: position
+          at: 0
         }
       });
-      groupMax = Math.max(groupMax, offset + item.delay + item.dur);
+
+      tl.add(itemTl, position);
+      groupMax = Math.max(groupMax, offset + itemTl.totalDuration());
     });
 
     cursor += Math.max(groupMax, 0);
@@ -190,49 +193,49 @@ export function buildSlideExitTimeline(
       const reverseFactory = factory && "reverse" in factory ? factory.reverse : undefined;
       const offset = parsePositionOffset(item.exitAt ?? item.at) ?? 0;
       const position = cursor + offset;
-
-      let usedDuration = item.exitDur;
+      const itemTl = gsapInstance.timeline();
 
       if (exitName && factory) {
         factory({
           el: item.el,
-          tl,
+          tl: itemTl,
           gsap: gsapInstance,
           opts: {
             dur: item.exitDur,
             delay: item.exitDelay,
             ease: item.exitEase,
             direction,
-            at: position
+            at: 0
           }
         });
       } else if (!exitName && reverseFactory) {
         reverseFactory({
           el: item.el,
-          tl,
+          tl: itemTl,
           gsap: gsapInstance,
           opts: {
             dur: item.exitDur,
             delay: item.exitDelay,
             ease: item.exitEase,
             direction,
-            at: position
+            at: 0
           }
         });
       } else {
-        tl.to(
+        itemTl.to(
           item.el,
           {
             autoAlpha: 0,
-            duration: usedDuration,
+            duration: item.exitDur,
             delay: item.exitDelay,
             ease: item.exitEase
           },
-          position
+          0
         );
       }
 
-      groupMax = Math.max(groupMax, offset + item.exitDelay + usedDuration);
+      tl.add(itemTl, position);
+      groupMax = Math.max(groupMax, offset + itemTl.totalDuration());
     });
 
     cursor += Math.max(groupMax, 0);
